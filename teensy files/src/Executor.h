@@ -2,11 +2,18 @@
 #define EXECUTOR_H
 
 #include <Arduino.h>
-#include "Structures.h"
+#include <malloc.h> // For memory allocation
+#include <Arduino.h>
+#include "imxrt.h"
+#include "core_cmInstr.h"
+#include "my_core_cm7m.h"
+#include "RamApiWrapper.h"
+#include "RamApiHostWrapper.h"
+
 
 class ProgramExecutor {
 public:
-    ProgramExecutor(BiosConfig* config = nullptr, Interfaces* interface = nullptr);
+    ProgramExecutor();
     
 
     bool loadProgram(const uint8_t* program, size_t size);
@@ -14,7 +21,7 @@ public:
     bool isEmpty();
     bool isLoaded();
     bool isRunning();
-
+    void setRamContext(RamContext* ctx);
 
     void stop();
 
@@ -22,15 +29,14 @@ private:
     
     
     uint8_t currentState;
-    uint8_t* programMemory;
+    void *programPtr;
     size_t programSize;
+    uint8_t *programMemory;
     
     // Memory management
     bool allocateMemory(size_t size);
     void freeMemory();
-    
-    BiosConfig* _biosConfig;
-    Interfaces* _interfaces;
+    RamContext* context;
 };
 
 #endif

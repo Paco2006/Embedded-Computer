@@ -1,41 +1,35 @@
-
-
 #include <Arduino.h>
 #include "Bios.h"
 #include "Executor.h"
+#include "RamApiWrapper.h"
+#include "RamApiHostWrapper.h"
 #include "Structures.h"
-#include "imxrt.h"
 
 Interfaces interfaces;
 BiosConfig biosConfig;
 
-ProgramExecutor programExecutor(&biosConfig, &interfaces);
+RamContext ctx = {
+    .api = &GlobalRamApi,
+    .config = &biosConfig,
+    .iface = &interfaces
+};
+    
+ProgramExecutor programExecutor;
 Bios bios(&programExecutor, &biosConfig, &interfaces);
-
-
 
 void setup() {
     bios.startup();
-    Serial.println((uint32_t)&GPIO4_DR, HEX);
+    Serial.println("bios done");
+    initRamHostApi(&interfaces); // Use your already existing global struct
+    Serial.println("ram done");
+    programExecutor.setRamContext(&ctx);
     programExecutor.execute();
+
+
     Serial.println("Booted up");
 }
 
 void loop() {
-    unsigned long currentMillis = millis();
 
-    if(Serial.available()){
-        char c = Serial.read();
-        if(c == '1'){
-        }
-        if(c == '2'){
-            
-        }
-        
-        if(c == '9'){
-            Serial.println("IM TEENSY");
-        }
-    }
-    
-    
+    delay(1000); // 1 second delay
 }

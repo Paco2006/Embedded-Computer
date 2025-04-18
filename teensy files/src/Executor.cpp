@@ -1,5 +1,4 @@
 #include "Executor.h"
-#include <malloc.h> // For memory allocation
 
 /*
 States:
@@ -9,17 +8,19 @@ States:
 
 */
 
-
-ProgramExecutor::ProgramExecutor(BiosConfig* config, Interfaces* interface ) 
+ProgramExecutor::ProgramExecutor() 
     {
-        _biosConfig = config;
-        _interfaces = interface;
         currentState = 1;
         programMemory = nullptr;
         programSize = 0;
     }
 
 bool ProgramExecutor::loadProgram(const uint8_t* program, size_t size) {
+
+    delay(1000);
+    SCB_DisableICache();
+    SCB_DisableDCache();
+
     if (currentState != 1) {
         return false;
     }
@@ -27,13 +28,15 @@ bool ProgramExecutor::loadProgram(const uint8_t* program, size_t size) {
     if (!allocateMemory(size)) {
         return false;
     }
-    
+
     memcpy(programMemory, program, size);
-    programSize = size;
+
     currentState = 2;
-    Serial.println("Program loaded");
+
     return true;
 }
+
+typedef void (*RamEntryFunc)(RamContext*);
 
 void ProgramExecutor::execute() {
     if (currentState != 2) {
@@ -41,30 +44,11 @@ void ProgramExecutor::execute() {
     }
     
     currentState = 3;
-    
-    // Function pointer to the loaded program
-    void (*program)() = (void (*)())((uintptr_t)programMemory );
-    Serial.printf("ProgMem: 0x%08X\n", (unsigned int)programMemory);
-    Serial.printf("Jumping to address: 0x%08X\n", (unsigned int)program);
 
-    uint32_t ptr = (unsigned int)program;
+    typedef void (*BootFunc)(RamApiWrapper*);
+    BootFunc boot = (BootFunc)((uintptr_t)programMemory | 1);
+    boot(&GlobalRamApi);
 
-    for(uint32_t i = ptr ;i<ptr + programSize; i++){
-        uint8_t b = *((uint8_t*)i);
-        Serial.printf("0x%02X ", i);
-        Serial.print(": ");
-        Serial.printf("%02X ", b);
-    }
-
-    program();
-    /*
-    volatile uint32_t* a   = (uint32_t*)0x4200C000;
-    volatile uint32_t* b   = (uint32_t*)0x4200C004;                                      
-
-    *a   |= (1<< 6);
-    *b   |= (1<< 6);
-    */
-    // Program finished or returned
     currentState = 1;
 }
 
@@ -109,4 +93,8 @@ void ProgramExecutor::freeMemory() {
         programMemory = nullptr;
     }
     programSize = 0;
+}
+
+void ProgramExecutor::setRamContext(RamContext* ctx) {
+    context = ctx;
 }

@@ -86,7 +86,7 @@ void Bios::startup() {
 
     //load bootloader
     loadBootloader();
-
+    
 }
 
 void Bios::loadSettings() {
@@ -483,9 +483,7 @@ bool Bios::loadBootloader() {
         Serial.print(bootloaderSize);
         Serial.println(" bytes.");
     }
-    for(int i = 0; i < bootloaderSize; i++){
-        Serial.print(char(bootloaderBuffer[i]));
-    }
+    
     _executor->loadProgram(bootloaderBuffer, bootloaderSize);
     return true;
 }

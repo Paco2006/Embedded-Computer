@@ -4,7 +4,7 @@
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <EEPROM.h>
-#include "Structures.h"
+#include "RamApiHostWrapper.h"
 #include "Executor.h"
 
 #define BIOS_VERSION "1.0.0"
