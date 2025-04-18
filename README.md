@@ -49,16 +49,16 @@ Breadboarded setup with Teensy 4.0 and communication bus
 Low leves system  IO (buttons and Leds)
 
 USB serial connected to PC 
-![Image of the breadboard ]()
+![Image of the breadboard](https://github.com/Paco2006/Embedded-Computer/blob/main/images/Breadboard.jpg)
 
 ## Current state of the project:
 Currently the project is able to load up the code onto RAM and execute the code but the code lacks any kind of functionality
 This is how the roadmap is looking for now:
 1. Make the bootloader load the Kernel and run it
-2. Make the Kernel initilaise the system
+2. Make the Kernel initialise the system
 3. Make the Kernel run tasks
 4. Make the Kernel be able to run multiple tasks at once
-5. Make the Kernel have taskt that run on startup (services)
+5. Make the Kernel have tasks that run on startup (services)
 6. Make the Kernel have "drivers" to control peripherals
 7. Make the Kernel have a way for task to communicate between themselves(something like the DBUS on linux)
 8. Make some kind of userspace and an official way to have a connection (something like the ttyX)
