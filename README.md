@@ -57,10 +57,10 @@ Currently the project is able to load up the code onto RAM and execute the code 
 
 This is how the roadmap is looking for now:
 
-1. Make the Kernel run tasks
-2. Make the Kernel be able to run multiple tasks at once
-3. Make the Kernel have tasks that run on startup (services)
-4. Make the Kernel have "drivers" to control peripherals
-5. Make the Kernel have a way for task to communicate between themselves(something like the DBUS on linux)
-6. Make some kind of userspace and an official way to have a connection (something like the ttyX)
-7. Maybe make peripherals that control a monitor via VGA and a keyboard input
+
+
+1. Make the Kernel have tasks that run on startup (services)
+2. Make the Kernel have "drivers" to control peripherals
+3. Make the Kernel have a way for task to communicate between themselves(something like the DBUS on linux)
+4. Make some kind of userspace and an official way to have a connection (something like the ttyX)
+5. Maybe make peripherals that control a monitor via VGA and a keyboard input
