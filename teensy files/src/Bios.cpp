@@ -19,12 +19,11 @@ Bios::Bios(ProgramExecutor* executor , BiosConfig* config, Interfaces* interface
     _config->SDCardCS = 15;
     _config->bootFromSD = true;
 
-    _config->SerialJumper = 6;
-    _config->BiosEditJumper = 7;
+    _config->Btn1 = 6;
+    _config->Btn2= 7;
     _config->Led1Pin = 5;
     _config->Led2Pin = 4;
 
-    // Initialize interface pointers to null
     _interfaces->serial = &Serial;
     _interfaces->spi = &SPI;
     _interfaces->wire = &Wire;
@@ -38,52 +37,41 @@ Bios::Bios(ProgramExecutor* executor , BiosConfig* config, Interfaces* interface
 
 void Bios::startup() {    
     
-    pinMode(_config->SerialJumper, INPUT);
-    pinMode(_config->BiosEditJumper, INPUT);
+    pinMode(_config->Btn1, INPUT_PULLUP);
+    pinMode(_config->Btn2, INPUT);
     pinMode(_config->Led1Pin, OUTPUT);
     pinMode(_config->Led2Pin, OUTPUT);
     
     unsigned long start_time = millis();
-    
+
+    _interfaces->serial->begin(115200);
+    _interfaces->serial->println("Serial enabled");
+
     while (true) {
-        if (digitalRead(_config->SerialJumper) == HIGH) {
-            SerialEnabled = true;
+        if (digitalRead(_config->Btn1) == HIGH) {
+            Serial.println("Starting BIOS editor...");
+            SettingsEditor();
             break;
         }
-        
+        if (digitalRead(_config->Btn2) == HIGH) {
+            Serial.println("Resetting to default settings...");
+            EEPROM.write(0, 0);
+            
+        }
         if (millis() - start_time > 10000) {
             break;
         }
-    }
-
-    if (SerialEnabled) {
-        _interfaces->serial->begin(115200);
-        _interfaces->serial->println("Serial enabled");
-        digitalWrite(_config->Led1Pin, HIGH);
     }
     
     loadSettings();
 
     start_time = millis();
     
-    if(SerialEnabled == true){
+    
     _interfaces->serial->println("Press Btn 2 to edit settings.");
         
-    
-    while (SerialEnabled == true) {
-        if (digitalRead(_config->BiosEditJumper) == HIGH) {
-            SettingsEditor();
-            break;
-        }
-        
-        if (millis() - start_time > 10000) {
-            break;
-        }
-    }
-    }
-    
     initAllInterfaces();
-
+    digitalWrite(_config->Led1Pin, HIGH);
     //load bootloader
     loadBootloader();
     
@@ -92,9 +80,9 @@ void Bios::startup() {
 void Bios::loadSettings() {
     if (EEPROM.read(0) == 0) {
         saveSettings();
-        if(SerialEnabled == true){
+        
             _interfaces->serial->println("bios settings not found, saved default settings");
-        }
+        
         return;
     }else if (EEPROM.read(0) == 1) {
         EEPROM.get(10, _config);
@@ -111,30 +99,30 @@ void Bios::initSD() {
     pinMode(_config->SDCardCS,OUTPUT);
     while(true){
     if (!_interfaces->sd->begin(_config->SDCardCS)) {
-        if(SerialEnabled == true){
+        
             _interfaces->serial->println("SD Card initialization failed!");
-        }   
+          
         digitalWrite(_config->Led2Pin, HIGH);
         delay(2500);
     } else {
-        if(SerialEnabled == true){
+        
             _interfaces->serial->println("SD Card initialized.");
-        }
+        
         digitalWrite(_config->Led2Pin, LOW);
         break;
     }
     }
     while(true){
     if (!_interfaces->sd->exists("bootup/boot.bin")) {
-        if(SerialEnabled == true){
+        
             _interfaces->serial->println("Boot file not found, trying again...");
-        }   
+          
         digitalWrite(_config->Led2Pin, HIGH);
         delay(2500);
     } else {
-        if(SerialEnabled == true){
+        
             _interfaces->serial->println("Boot file found.");
-        }
+        
         digitalWrite(_config->Led2Pin, LOW);
         break;
     }
@@ -143,15 +131,14 @@ void Bios::initSD() {
 
 
 bool Bios::isPinUsed(uint8_t pin) {
-    // Check reserved pins (LEDs, jumpers)
+
     if (pin == _config->Led1Pin || pin == _config->Led2Pin || 
-        pin == _config->SerialJumper || pin == _config->BiosEditJumper) {
+        pin == _config->Btn1 || pin == _config->Btn2) {
         return true;
     }
 
-    // Check SPI pins if SPI is enabled
     if (_config->SPIEnabled) {
-        // Teensy 4.0 default SPI pins (SCK=13, MISO=12, MOSI=11)
+
         if (pin == 13 || pin == 12 || pin == 11) {
             return true;
         }
@@ -163,15 +150,15 @@ bool Bios::isPinUsed(uint8_t pin) {
         }
     }
 
-    // Check I2C pins if I2C is enabled
+
     if (_config->I2CEnabled) {
-        // Teensy 4.0 default I2C pins (SDA=18, SCL=19)
+
         if (pin == 18 || pin == 19) {
             return true;
         }
     }
 
-    // Check SoftwareSerial pins
+
     for (int i = 0; i < _config->numSoftwareSerial; i++) {
         if (_config->SoftwareSerialPins[i][0] == pin || 
             _config->SoftwareSerialPins[i][1] == pin) {
@@ -179,16 +166,16 @@ bool Bios::isPinUsed(uint8_t pin) {
         }
     }
 
-    return false; // Pin is available
+    return false;
 }
 
 void Bios::SettingsEditor() {
-    if (!SerialEnabled) return;
     
-    // Print current settings
+    
+
     printCurrentSettings();
     
-    // Command processing loop
+
     while (true) {
         if (_interfaces->serial->available()) {
             String input = _interfaces->serial->readStringUntil('\n');
@@ -233,8 +220,7 @@ void Bios::SettingsEditor() {
 
 void Bios::printCurrentSettings() {
     _interfaces->serial->println("\n=== Current BIOS Settings ===");
-    
-    // SPI Settings
+
     _interfaces->serial->print("SPI: ");
     _interfaces->serial->println(_config->SPIEnabled ? "ENABLED" : "DISABLED");
     _interfaces->serial->print("SPI CS Pins: ");
@@ -248,11 +234,10 @@ void Bios::printCurrentSettings() {
         _interfaces->serial->println();
     }
     
-    // I2C Settings
+
     _interfaces->serial->print("I2C: ");
     _interfaces->serial->println(_config->I2CEnabled ? "ENABLED" : "DISABLED");
-    
-    // Serial Settings
+
     _interfaces->serial->println("SoftwareSerial Ports:");
     for (int i = 0; i < _config->numSoftwareSerial; i++) {
         _interfaces->serial->printf("  Port %d: RX=%d, TX=%d, Baud=%d\n", 
@@ -262,7 +247,7 @@ void Bios::printCurrentSettings() {
             _config->SoftwareSerialSpeed[i]);
     }
     
-    // Boot Settings
+
     _interfaces->serial->print("Boot from SD: ");
     _interfaces->serial->println(_config->bootFromSD ? "YES" : "NO");
     _interfaces->serial->print("SD Card CS Pin: ");
@@ -316,7 +301,7 @@ void Bios::handleCsCommand(String input) {
         return;
     }
     
-    // Add to CS pins array
+
     if (_config->numSPIPins < sizeof(_config->SPIPins)/sizeof(_config->SPIPins[0])) {
         _config->SPIPins[_config->numSPIPins++] = pin;
         _interfaces->serial->printf("Added SPI CS pin: %d\n", pin);
@@ -342,7 +327,7 @@ void Bios::handleI2cCommand(String input) {
 }
 
 void Bios::handleSerialCommand(String input) {
-    // Parse "serial=RX,TX,BAUD"
+
     int rx = input.substring(7).toInt();
     int tx = input.substring(input.indexOf(',') + 1).toInt();
     int baud = input.substring(input.lastIndexOf(',') + 1).toInt();
@@ -352,13 +337,12 @@ void Bios::handleSerialCommand(String input) {
         return;
     }
 
-    // Check pin conflicts
+
     if (isPinUsed(rx) || isPinUsed(tx)) {
         _interfaces->serial->printf("Error: Pin %d or %d is already in use.\n", rx, tx);
         return;
     }
 
-    // Add SoftwareSerial if slots available
     if (_config->numSoftwareSerial < 10) {
         _config->SoftwareSerialPins[_config->numSoftwareSerial][0] = rx;
         _config->SoftwareSerialPins[_config->numSoftwareSerial][1] = tx;
@@ -388,36 +372,34 @@ void Bios::handleBootCommand(String input) {
 
 void Bios::initAllInterfaces() {
     bool bootFound = false;
-    // Initialize Serial (always done in startup())
-    if (SerialEnabled) {
-        _interfaces->serial->begin(115200);
-    }
 
-    // Initialize SPI if enabled
+    
+
+
     if (_config->SPIEnabled) {
         _interfaces->spi->begin();
-        if (SerialEnabled) {
+        
             _interfaces->serial->println("SPI initialized");
             _interfaces->serial->print("CS Pins: ");
             for (int i = 0; i < _config->numSPIPins; i++) {
                 _interfaces->serial->print(_config->SPIPins[i]);
                 _interfaces->serial->print(" ");
-                pinMode(_config->SPIPins[i], OUTPUT); // Set CS pins as outputs
-                digitalWrite(_config->SPIPins[i], HIGH); // Default to HIGH (inactive)
+                pinMode(_config->SPIPins[i], OUTPUT);
+                digitalWrite(_config->SPIPins[i], HIGH);
             }
             _interfaces->serial->println();
-        }
+        
     }
 
-    // Initialize I2C if enabled
+
     if (_config->I2CEnabled) {
         _interfaces->wire->begin();
-        if (SerialEnabled) {
+        
             _interfaces->serial->println("I2C initialized (SDA=18, SCL=19)");
-        }
+        
     }
 
-    // Initialize SoftwareSerial ports
+
     for (int i = 0; i < _config->numSoftwareSerial; i++) {
         if (_config->SoftwareSerialPins[i][0] != -1 && 
             _config->SoftwareSerialPins[i][1] != -1) {
@@ -428,7 +410,7 @@ void Bios::initAllInterfaces() {
             );
             _interfaces->softwareSerial[i]->begin(_config->SoftwareSerialSpeed[i]);
             
-            if (SerialEnabled) {
+            
                 _interfaces->serial->printf(
                     "SoftwareSerial %d: RX=%d, TX=%d, Baud=%d\n",
                     i,
@@ -436,11 +418,11 @@ void Bios::initAllInterfaces() {
                     _config->SoftwareSerialPins[i][1],
                     _config->SoftwareSerialSpeed[i]
                 );
-            }
+            
         }
     }
 
-    // Initialize SD Card if enabled
+
     if(_config->bootFromSD == true){
         if(_config->SPIEnabled == true){
             initSD();
@@ -467,7 +449,7 @@ bool Bios::loadBootloader() {
     size_t bootloaderSize = 0;
     File bootFile = SD.open("/bootup/boot.bin", FILE_READ);
     if (!bootFile) {
-        if (SerialEnabled) _interfaces->serial->println("Failed to open bootloader file.");
+        _interfaces->serial->println("Failed to open bootloader file.");
         return false;
     }
     bootloaderSize = 0;
@@ -478,11 +460,11 @@ bool Bios::loadBootloader() {
 
     //give the file to executor
 
-    if (SerialEnabled) {
+    
         Serial.print("Bootloader read successfully. Size: ");
         Serial.print(bootloaderSize);
         Serial.println(" bytes.");
-    }
+    
     
     _executor->loadProgram(bootloaderBuffer, bootloaderSize);
     return true;

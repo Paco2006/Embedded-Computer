@@ -10,12 +10,12 @@
 #include <Wire.h>
 #include <SoftwareSerial.h>
 #include <stdlib.h>
+#include <SD.h>
+#include <malloc.h>
+#include <TeensyThreads.h>
 
 
 
-
-
-// --- Global instance ---
 extern RamApiWrapper GlobalRamApi;
 
 void initRamHostApi(Interfaces* iface);

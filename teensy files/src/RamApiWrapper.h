@@ -25,6 +25,8 @@ struct BaseFunc {
 
     void* (*malloc)(size_t);
     void (*free)(void*);
+    void (*memcpy)(void*, const void*, size_t);
+    void* (*memalign)(size_t, size_t);
 };
 
 // ------------------------------
@@ -32,7 +34,11 @@ struct BaseFunc {
 // ------------------------------
 struct USBSerial {
     void (*print)(const char*);
-    void (*println)( char*);
+    void (*printcln)(const char*);
+    void (*printu32ln)(const uint32_t);
+    void (*printu8ln)(const uint8_t);
+    void (*printintln)(const int);
+    void (*printptrln)(const uintptr_t);
     int (*available)();
     int (*read)();
     void (*flush)();
@@ -43,7 +49,7 @@ struct USBSerial {
 // ------------------------------
 struct SPICom {
     void (*begin)();
-    void (*beginTransaction)(void* settings); // Pass pointer to SPISettings if needed
+    void (*beginTransaction)(void* settings);
     void (*endTransaction)();
     uint8_t (*transfer)(uint8_t);
 };
@@ -73,6 +79,38 @@ struct SerialMux {
 };
 
 // ------------------------------
+// SD Card wrapper
+// ------------------------------
+struct SDInterface {
+    bool (*begin)(int pin);
+    bool (*exists)(const char* path);
+    uintptr_t (*open)(const char* path, const char* mode);
+    size_t (*read)(uintptr_t file, void* buffer, size_t len);
+    size_t (*write)(uintptr_t file, const void* buffer, size_t len);
+    void (*close)(uintptr_t file);
+    size_t (*size)(uintptr_t file);
+    bool (*remove)(const char* path);
+    void (*flush)(uintptr_t file);
+    bool (*mkdir)(const char* path);
+    bool (*rmdir)(const char* path);
+};
+// ------------------------------
+// Threading interface 
+// ------------------------------
+struct ThreadingInterface {
+    int (*start)(int new_state);
+    int (*stop)();
+    int (*yield)();
+    int (*addthreadS)(void (*func)());
+    int (*addthreadA)(void (*func)(void*), void* arg, unsigned int stack_size, void* stack);
+    void (*delay)(int ms);
+    int (*id)();
+    int (*kill)(int id);
+    int (*suspend)(int id);
+    int (*restart)(int id);
+    int (*getState)(int id);
+};
+// ------------------------------
 // Master API struct to hold everything
 // ------------------------------
 struct RamApiWrapper {
@@ -81,6 +119,8 @@ struct RamApiWrapper {
     SPICom* spi;
     I2CCom* i2c;
     SerialMux* serialMux;
+    SDInterface* sd; 
+    ThreadingInterface* threading;
 };
 
 #ifdef __cplusplus

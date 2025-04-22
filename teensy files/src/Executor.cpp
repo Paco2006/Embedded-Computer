@@ -30,13 +30,12 @@ bool ProgramExecutor::loadProgram(const uint8_t* program, size_t size) {
     }
 
     memcpy(programMemory, program, size);
-
+    programSize = size;
     currentState = 2;
 
     return true;
 }
 
-typedef void (*RamEntryFunc)(RamContext*);
 
 void ProgramExecutor::execute() {
     if (currentState != 2) {
@@ -44,10 +43,10 @@ void ProgramExecutor::execute() {
     }
     
     currentState = 3;
-
-    typedef void (*BootFunc)(RamApiWrapper*);
+    
+    typedef void (*BootFunc)(RamContext*);
     BootFunc boot = (BootFunc)((uintptr_t)programMemory | 1);
-    boot(&GlobalRamApi);
+    boot(context);
 
     currentState = 1;
 }
@@ -75,7 +74,6 @@ bool ProgramExecutor::isRunning() {
 
 void ProgramExecutor::stop() {
     if (currentState == 3) {
-        // In a real system, you'd need to properly unwind the stack, etc.
         currentState = 2;
     }
 }

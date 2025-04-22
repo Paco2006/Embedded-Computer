@@ -32,10 +32,8 @@ class Bios {
     void handleI2cCommand(String input);
     void handleSerialCommand(String input);
     void handleBootCommand(String input);
+
     
-
-
-    bool SerialEnabled;
     void loadSettings();
     void saveSettings();
     void initSD();

@@ -1,12 +1,13 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
+/*
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <EEPROM.h>
-
+*/
 
 struct BiosConfig {
     bool SPIEnabled = 0;
@@ -29,7 +30,7 @@ struct BiosConfig {
     uint8_t Led1Pin = 0;
     uint8_t Led2Pin = 0;
 };
-
+/*
 struct Interfaces{
     usb_serial_class* serial;
     SoftwareSerial* softwareSerial[10];
@@ -37,5 +38,5 @@ struct Interfaces{
     TwoWire* wire;
     SDClass* sd;
 };
-
+*/
 #endif

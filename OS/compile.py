@@ -3,12 +3,11 @@ import subprocess
 import shutil
 import sys
 
-file_list = ["boot"]
+file_list = ["boot","kernel"]
 
-# This maps source names to subfolder paths (also used for input!)
 file_targets = {
-    "boot": "bootup"
-    
+    "boot": "bootup",
+    "kernel": "system"
 }
 
 build_script = "./build.sh"
@@ -16,7 +15,6 @@ input_dir = "os-sorce"
 output_dir = "os-compiled"
 
 def run_builds():
-    # Clean up previous runs
     for folder in [output_dir, "junk"]:
         if os.path.exists(folder):
             shutil.rmtree(folder)
@@ -31,7 +29,6 @@ def run_builds():
 
         print(f"\nBuilding {name} from {src_path}")
 
-        # Copy to working dir for building
         shutil.copy(src_path, f"{name}.cpp")
 
         try:
@@ -40,9 +37,9 @@ def run_builds():
             print(f"Build failed for {name}:\n{e.stderr}")
             continue
         finally:
-            os.remove(f"{name}.cpp")  # cleanup temp file
+            os.remove(f"{name}.cpp")  
 
-        # Move .bin to correct output folder
+
         bin_file = f"{name}.bin"
         if os.path.exists(bin_file):
             target_path = os.path.join(output_dir, subpath)
