@@ -22,6 +22,7 @@ struct BaseFunc {
     void (*digitalWrite)(uint8_t, uint8_t);
     uint8_t (*digitalRead)(uint8_t);
     void (*pinMode)(uint8_t, uint8_t);
+    int (*analogRead)(uint8_t);
 
     void* (*malloc)(size_t);
     void (*free)(void*);

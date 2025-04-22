@@ -3,15 +3,15 @@ import subprocess
 import shutil
 import sys
 
-file_list = ["boot","kernel","dbus","executor","input","output"]
+file_list = ["boot","kernel","onetime","input","output","ledpwm"]
 
 file_targets = {
     "boot": "bootup",
     "kernel": "system",
-    "dbus":"execs/dbus",
-    "executor":"execs/executor",
+    "onetime":"execs/onetime",
     "input":"execs/input",
-    "output":"execs/output"
+    "output":"execs/output",
+    "ledpwm":"execs/ledpwm"
 }
 
 passthrough_list = ["config"]

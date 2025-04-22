@@ -12,11 +12,5 @@ void boot_main(RamContext* MCctx) {
     MCRefGlobal = MCctx->api;
     MCCfgGlobal = MCctx->config;
 
-    while(1){
-        int i = MCRefGlobal->base->digitalRead(7);
-        if(i == 1){
-            MCRefGlobal->usb->printcln("pressed!");
-        }
-        MCRefGlobal->base->delay(100);
-    }
+    MCRefGlobal->usb->printcln("hello once");
 }
