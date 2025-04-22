@@ -126,6 +126,8 @@ uintptr_t sd_open(const char* path, const char* mode) {
         delete f;
         return 0;
     }
+
+
     return (uintptr_t)f;
 }
 

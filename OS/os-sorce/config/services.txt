@@ -1,0 +1,4 @@
+/execs/dbus/dbus.bin
+/execs/executor/executor.bin
+/execs/input/input.bin
+/execs/ouput/ouput.bin

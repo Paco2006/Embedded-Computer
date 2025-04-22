@@ -3,12 +3,18 @@ import subprocess
 import shutil
 import sys
 
-file_list = ["boot","kernel"]
+file_list = ["boot","kernel","dbus","executor","input","output"]
 
 file_targets = {
     "boot": "bootup",
-    "kernel": "system"
+    "kernel": "system",
+    "dbus":"execs/dbus",
+    "executor":"execs/executor",
+    "input":"execs/input",
+    "output":"execs/output"
 }
+
+passthrough_list = ["config"]
 
 build_script = "./build.sh"
 input_dir = "os-sorce"
@@ -48,6 +54,14 @@ def run_builds():
             print(f"{bin_file} placed in {target_path}")
         else:
             print(f"No .bin file found for {name}")
+    for folder in passthrough_list:
+        src = os.path.join(input_dir, folder)
+        dst = os.path.join(output_dir, folder)
+        if os.path.exists(src):
+            print(f"Copying folder {folder} as-is")
+            shutil.copytree(src, dst)
+        else:
+            print(f"Passthrough folder not found: {src}")
 
 def get_usb_mounts():
     mounts = []
