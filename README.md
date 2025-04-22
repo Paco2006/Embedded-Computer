@@ -51,6 +51,19 @@ Low leves system  IO (buttons and Leds)
 USB serial connected to PC 
 ![Image of the breadboard](https://github.com/Paco2006/Embedded-Computer/blob/main/images/Breadboard.jpg)
 
+## A little guide about the files:
+in teensy files is the platformio project
+in src is located the project with all its stuff
+in lib are all the external libraries found/scraped from the internet
+
+in the os folder is located the code for the os
+using the python script you will build the whole project
+if you wish to add any files to be automaticaly placed in the fresh compile and/or to be compiled you can do that with the 3 lists in the beginning of the python script
+os-sorce - the sorce of the project, all files decompiled
+os-compiled - the compiled verion and if you added al files needed in the python script can be copy/pasted as is on the sd card
+libs - all libraries that are used for every file
+junk - used to store all output files of the compilation procees that are otherwise not needed but are useful for debuging
+
 
 ## Current state of the project:
 Currently the project is able to load up the code onto RAM and execute the code but the code lacks any kind of functionality
@@ -59,8 +72,6 @@ This is how the roadmap is looking for now:
 
 
 
-1. Make the Kernel have tasks that run on startup (services)
+1. Make the Kernel have a way for task to communicate between themselves(something like the DBUS on linux)
 2. Make the Kernel have "drivers" to control peripherals
-3. Make the Kernel have a way for task to communicate between themselves(something like the DBUS on linux)
-4. Make some kind of userspace and an official way to have a connection (something like the ttyX)
-5. Maybe make peripherals that control a monitor via VGA and a keyboard input
+3. Maybe make peripherals that control a monitor via VGA and a keyboard input
