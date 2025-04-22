@@ -50,7 +50,7 @@ Low leves system  IO (buttons and Leds)
 
 USB serial connected to PC 
 ![Image of the breadboard](https://github.com/Paco2006/Embedded-Computer/blob/main/images/Breadboard.jpg)
-
+![electrical diagram](https://github.com/Paco2006/Embedded-Computer/blob/main/images/elscheme.png)
 ## A little guide about the files:
 in teensy files is the platformio project
 in src is located the project with all its stuff
